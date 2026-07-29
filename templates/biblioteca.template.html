@@ -363,6 +363,7 @@ const UI = {
     libRecitals:'Considerando', libRecital:'Considerando', libArticles:'Capi e Articoli', libAnnexes:'Allegati', libOmnibus:'Digital Omnibus 2026/1744',
     libRecitalsDesc:'I considerando espongono le motivazioni del legislatore. Non sono vincolanti, ma aiutano a interpretare gli articoli.',
     libPrev:'← Precedente', libNext:'Successivo →',
+    omnibusNote:'Il testo del Digital Omnibus (Regolamento (UE) 2026/1744) è riportato qui solo in inglese: la traduzione ufficiale italiana non risultava ancora pubblicata su EUR-Lex al momento della creazione di questa libreria.',
     s1:'01', s1t:'Livelli di rischio', s1d:'L\u2019AI Act adotta un approccio basato sul rischio: quattro livelli, più il regime parallelo per i modelli GPAI.',
     tierU:'Rischio inaccettabile — Vietato', tierUd:'Vietato in modo assoluto dall\u2019articolo 5. Non esiste un percorso di conformità: va evitato o eliminato.',
     tierH:'Alto rischio', tierHd:'Obblighi estesi per fornitori e deployer (artt. 6\u201349): gestione del rischio, governance dei dati, documentazione, sorveglianza umana, valutazione di conformità.',
@@ -400,6 +401,7 @@ const UI = {
     libRecitals:'Recitals', libRecital:'Recital', libArticles:'Chapters and Articles', libAnnexes:'Annexes', libOmnibus:'Digital Omnibus 2026/1744',
     libRecitalsDesc:'Recitals set out the legislator’s reasoning. They are not binding, but help interpret the articles.',
     libPrev:'← Previous', libNext:'Next →',
+    omnibusNote:'The Digital Omnibus (Regulation (EU) 2026/1744) is shown here in English only: the official Italian translation was not yet published on EUR-Lex when this library was built.',
     s1:'01', s1t:'Risk tiers', s1d:'The AI Act takes a risk-based approach: four tiers, plus a parallel regime for GPAI models.',
     tierU:'Unacceptable risk — Prohibited', tierUd:'Banned outright under Article 5. No compliance route exists — it must be avoided or removed.',
     tierH:'High risk', tierHd:'Extensive obligations for providers and deployers (Arts 6\u201349): risk management, data governance, documentation, human oversight, conformity assessment.',
@@ -1341,12 +1343,40 @@ function bindLibraryNav(){
   });
 }
 
+function renderAnnexesView(){
+  const L = UI[state.lang];
+  const annexes = LIBRARY_DATA[state.lang].annexes;
+  const items = annexes.map(a=>`
+    <details class="lib-accordion-item" id="anx-${a.num}">
+      <summary>${state.lang==='it'?'Allegato':'Annex'} ${a.num} — ${a.title}</summary>
+      <div class="lib-doc-body">${a.html}</div>
+    </details>`).join('');
+  return `
+    <div class="block-head"><span class="block-num">§</span><h2>${L.libAnnexes}</h2></div>
+    <div class="lib-accordion">${items}</div>`;
+}
+
+function renderOmnibusView(){
+  const L = UI[state.lang];
+  const arts = OMNIBUS_DATA.en.articles;
+  const items = arts.map(a=>`
+    <details class="lib-accordion-item" id="omnibus-${a.num}">
+      <summary>Article ${a.num} — ${a.title}</summary>
+      <div class="lib-doc-body">${a.html}</div>
+    </details>`).join('');
+  return `
+    <div class="block-head"><span class="block-num">§</span><h2>${L.libOmnibus}</h2></div>
+    <div class="lib-note">${L.omnibusNote}</div>
+    <div class="lib-accordion">${items}</div>`;
+}
+
 function renderLibrary(){
   renderLibrarySidebar();
   const root = document.getElementById('libraryMain');
   if(state.libSection==='recitals') root.innerHTML = renderRecitalsView();
   else if(state.libSection==='articles') root.innerHTML = renderArticleView();
-  else root.innerHTML = ''; // annexes/omnibus added in Task 4
+  else if(state.libSection==='annexes') root.innerHTML = renderAnnexesView();
+  else if(state.libSection==='omnibus') root.innerHTML = renderOmnibusView();
   bindLibraryNav();
 }
 
