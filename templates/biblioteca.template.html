@@ -296,6 +296,14 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .lib-note{background:var(--card); border:1px dashed var(--indigo); border-radius:3px; padding:14px 16px; font-size:13px; color:var(--ink-soft); margin-bottom:20px;}
 .art-golib{display:inline-block; margin-top:10px; padding:4px 10px; border:1px solid var(--rule); border-radius:20px; background:transparent; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--rubric); cursor:pointer;}
 .art-golib:hover{background:var(--rubric); color:#fff; border-color:var(--rubric);}
+.sanc-chart{margin-bottom:26px; display:flex; flex-direction:column; gap:10px;}
+.sanc-row{display:grid; grid-template-columns:220px 1fr 150px; align-items:center; gap:12px;}
+.sanc-label{font-size:12px; color:var(--ink-soft);}
+.sanc-bar-track{background:var(--paper-2); border-radius:20px; height:14px; overflow:hidden;}
+.sanc-bar{height:100%; background:var(--rubric); border-radius:20px;}
+.sanc-amount{font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:right; white-space:nowrap;}
+.sanc-pct{color:var(--ink-faint);}
+@media (max-width:700px){ .sanc-row{grid-template-columns:1fr; gap:4px;} }
 </style>
 </head>
 <body>
@@ -1034,6 +1042,22 @@ function renderTimeline(){
   </section>`;
 }
 
+function renderSanctionsChart(){
+  const max = 35000000;
+  const rows = PENALTIES.map(p=>{
+    const val = parseInt(p.amount.replace(/[^\d]/g,''),10);
+    const widthPct = (val/max*100).toFixed(1);
+    const label = state.lang==='it' ? p.n_it : p.n_en;
+    const amount = state.lang==='it' ? p.amount : p.amountEn;
+    return `<div class="sanc-row">
+      <div class="sanc-label">${label}</div>
+      <div class="sanc-bar-track"><div class="sanc-bar" style="width:${widthPct}%"></div></div>
+      <div class="sanc-amount">${amount} <span class="sanc-pct">/ ${p.pct}</span></div>
+    </div>`;
+  }).join('');
+  return `<div class="sanc-chart">${rows}</div>`;
+}
+
 function renderPenalties(){
   const L = UI[state.lang];
   const cards = PENALTIES.map(p=>`
@@ -1047,6 +1071,7 @@ function renderPenalties(){
   <section class="block" id="penalties">
     <div class="block-head"><span class="block-num">${L.s3}</span><h2>${L.s3t}</h2></div>
     <p class="block-desc">${L.s3d}</p>
+    ${renderSanctionsChart()}
     <div class="pen-grid">${cards}</div>
     <div class="pen-notes">
       <div>${L.penNote1}</div>
