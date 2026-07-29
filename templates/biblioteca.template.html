@@ -257,6 +257,11 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 }
 
 .js-hidden{display:none !important;}
+.search-results-panel{display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--card); border:1px solid var(--rule); border-radius:3px; box-shadow:var(--shadow); max-height:320px; overflow-y:auto; z-index:50;}
+.search-results-panel.show{display:block;}
+.search-result{display:block; width:100%; text-align:left; padding:8px 12px; border:none; border-bottom:1px solid var(--rule); background:transparent; cursor:pointer; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif;}
+.search-result:last-child{border-bottom:none;}
+.search-result:hover{background:var(--paper-2);}
 </style>
 </head>
 <body>
@@ -273,8 +278,13 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
     <div class="searchwrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="searchInput" type="text" data-i18n-ph="searchph">
+      <div class="search-results-panel" id="searchResultsPanel"></div>
     </div>
     <span class="search-count" id="searchCount"></span>
+    <div class="langtoggle" id="modeToggle">
+      <button id="btnGuide" class="active"></button>
+      <button id="btnLibrary"></button>
+    </div>
     <div class="langtoggle">
       <button id="btnIT" class="active">IT</button>
       <button id="btnEN">EN</button>
@@ -282,9 +292,14 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
   </div>
 </header>
 
-<div class="shell">
+<div class="shell" id="guideShell">
   <nav class="sidebar" id="sidebar"></nav>
   <main id="main"></main>
+</div>
+
+<div class="shell" id="libraryShell" style="display:none">
+  <nav class="sidebar" id="librarySidebar"></nav>
+  <main id="libraryMain"></main>
 </div>
 
 <footer id="footer"></footer>
@@ -312,6 +327,7 @@ const UI = {
     heroMeta1v: 'Regolamento (UE) 2026/1744 — in vigore dal 27 luglio 2026',
     heroMeta2: 'Solo a scopo informativo — non costituisce consulenza legale.',
     navDash:'Dashboard', navClass:'Strumento di classificazione', navRoles:'Obblighi per ruolo', navChapters:'Capitoli', navAnnex:'Allegati', navScen:'Casi pratici',
+    modeGuide:'Guida', modeLibrary:'Biblioteca', searchLibPh:'Cerca nel testo integrale…',
     s1:'01', s1t:'Livelli di rischio', s1d:'L\u2019AI Act adotta un approccio basato sul rischio: quattro livelli, più il regime parallelo per i modelli GPAI.',
     tierU:'Rischio inaccettabile — Vietato', tierUd:'Vietato in modo assoluto dall\u2019articolo 5. Non esiste un percorso di conformità: va evitato o eliminato.',
     tierH:'Alto rischio', tierHd:'Obblighi estesi per fornitori e deployer (artt. 6\u201349): gestione del rischio, governance dei dati, documentazione, sorveglianza umana, valutazione di conformità.',
@@ -345,6 +361,7 @@ const UI = {
     heroMeta1v: 'Regulation (EU) 2026/1744 — in force since 27 July 2026',
     heroMeta2: 'For informational purposes only — not legal advice.',
     navDash:'Dashboard', navClass:'Classification tool', navRoles:'Obligations by role', navChapters:'Chapters', navAnnex:'Annexes', navScen:'Common scenarios',
+    modeGuide:'Guide', modeLibrary:'Library', searchLibPh:'Search the full text…',
     s1:'01', s1t:'Risk tiers', s1d:'The AI Act takes a risk-based approach: four tiers, plus a parallel regime for GPAI models.',
     tierU:'Unacceptable risk — Prohibited', tierUd:'Banned outright under Article 5. No compliance route exists — it must be avoided or removed.',
     tierH:'High risk', tierHd:'Extensive obligations for providers and deployers (Arts 6\u201349): risk management, data governance, documentation, human oversight, conformity assessment.',
@@ -1208,16 +1225,36 @@ function applySearch(){
 /* ============================= INIT & EVENTS ============================= */
 document.getElementById('btnIT').addEventListener('click', ()=> setLang('it'));
 document.getElementById('btnEN').addEventListener('click', ()=> setLang('en'));
+document.getElementById('btnGuide').addEventListener('click', ()=> setMode('guide'));
+document.getElementById('btnLibrary').addEventListener('click', ()=> setMode('library'));
+
+function setMode(mode){
+  state.mode = mode;
+  document.getElementById('guideShell').style.display = mode==='guide' ? 'flex' : 'none';
+  document.getElementById('libraryShell').style.display = mode==='library' ? 'flex' : 'none';
+  document.getElementById('btnGuide').classList.toggle('active', mode==='guide');
+  document.getElementById('btnLibrary').classList.toggle('active', mode==='library');
+  document.getElementById('searchInput').placeholder = mode==='library' ? UI[state.lang].searchLibPh : UI[state.lang].searchph;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResultsPanel').classList.remove('show');
+  state.query = '';
+  document.getElementById('searchCount').textContent = '';
+  if(mode==='library' && typeof renderLibrary==='function') renderLibrary();
+}
+
 function setLang(lang){
   state.lang = lang;
   document.documentElement.lang = lang;
   document.getElementById('btnIT').classList.toggle('active', lang==='it');
   document.getElementById('btnEN').classList.toggle('active', lang==='en');
-  document.getElementById('searchInput').placeholder = UI[lang].searchph;
+  document.getElementById('btnGuide').textContent = UI[lang].modeGuide;
+  document.getElementById('btnLibrary').textContent = UI[lang].modeLibrary;
+  document.getElementById('searchInput').placeholder = state.mode==='library' ? UI[lang].searchLibPh : UI[lang].searchph;
   renderSidebar();
   renderMain();
   renderFooter();
   document.getElementById('searchInput').value = state.query;
+  if(state.mode==='library' && typeof renderLibrary==='function') renderLibrary();
 }
 
 document.getElementById('searchInput').addEventListener('input', (e)=>{
