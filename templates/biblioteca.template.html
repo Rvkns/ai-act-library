@@ -1365,6 +1365,74 @@ function bindLibraryNav(){
   });
 }
 
+let libSearchIndex = null;
+function stripHtml(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || '';
+}
+function buildLibSearchIndex(){
+  libSearchIndex = {it:[], en:[]};
+  ['it','en'].forEach(lang=>{
+    const d = LIBRARY_DATA[lang];
+    d.articles.forEach(a=>libSearchIndex[lang].push({type:'article', num:a.num, title:a.title, text:(a.title+' '+stripHtml(a.html)).toLowerCase()}));
+    d.recitals.forEach(r=>libSearchIndex[lang].push({type:'recital', num:r.num, title:'', text:stripHtml(r.html).toLowerCase()}));
+    d.annexes.forEach(a=>libSearchIndex[lang].push({type:'annex', num:a.num, title:a.title, text:(a.title+' '+stripHtml(a.html)).toLowerCase()}));
+  });
+}
+function applyLibrarySearch(){
+  const panel = document.getElementById('searchResultsPanel');
+  const q = state.query.trim().toLowerCase();
+  if(!q){ panel.classList.remove('show'); panel.innerHTML=''; document.getElementById('searchCount').textContent=''; return; }
+  if(!libSearchIndex) buildLibSearchIndex();
+  const matches = libSearchIndex[state.lang].filter(e=>e.text.includes(q)).slice(0,25);
+  document.getElementById('searchCount').textContent = matches.length + ' ' + UI[state.lang].results;
+  panel.innerHTML = matches.map(m=>{
+    const label = m.type==='article' ? `${state.lang==='it'?'Art.':'Art.'} ${m.num} — ${m.title}` :
+                  m.type==='recital' ? `${state.lang==='it'?'Considerando':'Recital'} ${m.num}` :
+                  `${state.lang==='it'?'Allegato':'Annex'} ${m.num} — ${m.title}`;
+    return `<button class="search-result" data-type="${m.type}" data-num="${m.num}">${label}</button>`;
+  }).join('');
+  panel.classList.toggle('show', matches.length>0);
+  panel.querySelectorAll('.search-result').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      openLibraryResult(btn.getAttribute('data-type'), btn.getAttribute('data-num'), state.query.trim());
+      panel.classList.remove('show');
+    });
+  });
+}
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightTerm(root, term){
+  if(!term) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const re = new RegExp('('+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'ig');
+  const nodes = [];
+  let n; while((n = walker.nextNode())) nodes.push(n);
+  nodes.forEach(node=>{
+    if(!re.test(node.nodeValue)) return;
+    re.lastIndex = 0;
+    const escaped = escapeHtml(node.nodeValue);
+    const span = document.createElement('span');
+    span.innerHTML = escaped.replace(re, '<mark>$1</mark>');
+    node.parentNode.replaceChild(span, node);
+  });
+}
+function openLibraryResult(type, num, term){
+  if(type==='article'){ state.libSection='articles'; state.libArticle=parseInt(num,10); }
+  else if(type==='annex'){ state.libSection='annexes'; }
+  else if(type==='recital'){ state.libSection='recitals'; }
+  renderLibrary();
+  requestAnimationFrame(()=>{
+    let target = null;
+    if(type==='recital') target = document.getElementById('rec-'+num);
+    if(type==='annex') target = document.getElementById('anx-'+num);
+    if(target){ target.open = true; target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    if(term) highlightTerm(document.getElementById('libraryMain'), term);
+  });
+}
+
 function renderAnnexesView(){
   const L = UI[state.lang];
   const annexes = LIBRARY_DATA[state.lang].annexes;
@@ -1439,7 +1507,7 @@ function setLang(lang){
 
 document.getElementById('searchInput').addEventListener('input', (e)=>{
   state.query = e.target.value;
-  applySearch();
+  if(state.mode==='library') applyLibrarySearch(); else applySearch();
 });
 
 setLang('it');
