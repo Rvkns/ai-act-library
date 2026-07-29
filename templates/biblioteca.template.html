@@ -294,6 +294,8 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .lib-art-link:hover{background:var(--paper-2);}
 .active-lib{background:var(--ink) !important; color:var(--paper) !important;}
 .lib-note{background:var(--card); border:1px dashed var(--indigo); border-radius:3px; padding:14px 16px; font-size:13px; color:var(--ink-soft); margin-bottom:20px;}
+.art-golib{display:inline-block; margin-top:10px; padding:4px 10px; border:1px solid var(--rule); border-radius:20px; background:transparent; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--rubric); cursor:pointer;}
+.art-golib:hover{background:var(--rubric); color:#fff; border-color:var(--rubric);}
 </style>
 </head>
 <body>
@@ -364,6 +366,7 @@ const UI = {
     libRecitalsDesc:'I considerando espongono le motivazioni del legislatore. Non sono vincolanti, ma aiutano a interpretare gli articoli.',
     libPrev:'← Precedente', libNext:'Successivo →',
     omnibusNote:'Il testo del Digital Omnibus (Regolamento (UE) 2026/1744) è riportato qui solo in inglese: la traduzione ufficiale italiana non risultava ancora pubblicata su EUR-Lex al momento della creazione di questa libreria.',
+    goToText:'Testo integrale →',
     s1:'01', s1t:'Livelli di rischio', s1d:'L\u2019AI Act adotta un approccio basato sul rischio: quattro livelli, più il regime parallelo per i modelli GPAI.',
     tierU:'Rischio inaccettabile — Vietato', tierUd:'Vietato in modo assoluto dall\u2019articolo 5. Non esiste un percorso di conformità: va evitato o eliminato.',
     tierH:'Alto rischio', tierHd:'Obblighi estesi per fornitori e deployer (artt. 6\u201349): gestione del rischio, governance dei dati, documentazione, sorveglianza umana, valutazione di conformità.',
@@ -402,6 +405,7 @@ const UI = {
     libRecitalsDesc:'Recitals set out the legislator’s reasoning. They are not binding, but help interpret the articles.',
     libPrev:'← Previous', libNext:'Next →',
     omnibusNote:'The Digital Omnibus (Regulation (EU) 2026/1744) is shown here in English only: the official Italian translation was not yet published on EUR-Lex when this library was built.',
+    goToText:'Full text →',
     s1:'01', s1t:'Risk tiers', s1d:'The AI Act takes a risk-based approach: four tiers, plus a parallel regime for GPAI models.',
     tierU:'Unacceptable risk — Prohibited', tierUd:'Banned outright under Article 5. No compliance route exists — it must be avoided or removed.',
     tierH:'High risk', tierHd:'Extensive obligations for providers and deployers (Arts 6\u201349): risk management, data governance, documentation, human oversight, conformity assessment.',
@@ -1136,15 +1140,20 @@ function renderChapters(){
     const badgeHtml = badge
       ? `<span class="chapter-status" style="background:${badge.color}22;color:${badge.color}">${badge.label}</span>`
       : `<span class="chapter-status" style="background:var(--paper-2);color:var(--ink-faint)">${L.phased}</span>`;
-    const articles = c.articles.map(a=>`
+    const articles = c.articles.map(a=>{
+      const firstNum = parseInt(a.num, 10);
+      const goLib = !isNaN(firstNum) ? `<button class="art-golib" data-golib="${firstNum}">${L.goToText}</button>` : '';
+      return `
       <div class="art-card" data-tags="${a.tags.join(' ')}" data-search="${(state.lang==='it'?a.it_t+' '+a.it_s:a.en_t+' '+a.en_s).toLowerCase()} ${a.num.toLowerCase()}">
         <div class="art-num">${a.num}</div>
         <div class="art-body">
           <div class="art-title">${state.lang==='it'?a.it_t:a.en_t}</div>
           <div class="art-summary">${state.lang==='it'?a.it_s:a.en_s}</div>
           <div class="art-tags">${a.tags.map(t=>`<span class="tag">${{provider:L.filterProvider,deployer:L.filterDeployer,importer:L.filterImporter,distributor:L.filterDistributor,gpai:L.filterGpai,governance:L.filterGov,general:L.filterGeneral}[t]}</span>`).join('')}</div>
+          ${goLib}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     return `
     <div class="chapter" id="${c.id}">
       <div class="chapter-head">
@@ -1213,7 +1222,20 @@ function renderMain(){
   renderClassifyBox();
   bindRoleTabs();
   bindFilterChips();
+  bindGoLib();
   applySearch();
+}
+
+function bindGoLib(){
+  document.querySelectorAll('.art-golib').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const n = parseInt(btn.getAttribute('data-golib'),10);
+      state.libSection = 'articles';
+      state.libArticle = n;
+      setMode('library');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
 }
 
 function bindRoleTabs(){
