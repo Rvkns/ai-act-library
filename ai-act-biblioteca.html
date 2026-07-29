@@ -65,13 +65,9 @@ header.topbar{
   max-width:var(--maxw); margin:0 auto; padding:14px 24px;
   display:flex; align-items:center; gap:18px; flex-wrap:wrap;
 }
-.brand{display:flex; align-items:baseline; gap:10px; flex:0 0 auto;}
-.brand-mark{
-  width:30px;height:30px;border:1.5px solid var(--rubric); border-radius:2px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; color:var(--rubric);
-  flex:0 0 auto;
-}
+.brand{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+.brand-logo-wrap{display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+.brand-logo-img{height:32px !important; max-height:32px !important; width:auto !important; display:block; object-fit:contain;}
 .brand-title{font-family:'Fraunces',serif; font-weight:600; font-size:19px; letter-spacing:.01em;}
 .brand-sub{font-size:11px; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; letter-spacing:.02em;}
 
@@ -359,6 +355,10 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .oj-quotation { border-left: 3px solid var(--rubric-soft); padding-left: 14px; margin: 12px 0; color: var(--ink-soft); font-style: italic; }
 .eli-subdivision { margin-bottom: 12px; }
 .eli-container, .eli-main-title, .eli-title { margin-bottom: 14px; }
+
+.brand-logo-wrap { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.brand-logo-img { height: 32px !important; max-height: 32px !important; width: auto !important; display: block; object-fit: contain; }
+
 </style>
 </head>
 <body>
