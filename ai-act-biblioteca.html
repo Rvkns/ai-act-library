@@ -316,8 +316,49 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .sanc-bar-track{background:var(--paper-2); border-radius:20px; height:14px; overflow:hidden;}
 .sanc-bar{height:100%; background:var(--rubric); border-radius:20px;}
 .sanc-amount{font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:right; white-space:nowrap;}
-.sanc-pct{color:var(--ink-faint);}
-@media (max-width:700px){ .sanc-row{grid-template-columns:1fr; gap:4px;} }
+.omnibus-alert-banner {
+  background: rgba(195, 92, 59, 0.08);
+  border: 1px solid rgba(195, 92, 59, 0.3);
+  border-left: 4px solid var(--rubric-soft);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.omnibus-alert-banner .o-icon { font-size: 18px; flex: 0 0 auto; }
+.omnibus-alert-banner .o-text { flex: 1 1 240px; }
+.omnibus-alert-banner .o-text strong { display: block; font-size: 13.5px; color: var(--ink); margin-bottom: 2px; }
+.omnibus-alert-banner .o-text p { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+.omnibus-alert-banner .o-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--rubric);
+  background: rgba(150, 39, 26, 0.08);
+  padding: 6px 12px;
+  border-radius: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.omnibus-alert-banner .o-link:hover {
+  background: var(--rubric);
+  color: #ffffff;
+}
+
+/* EUR-Lex Semantic Classes */
+.oj-bold { font-weight: 700; color: var(--ink); }
+.oj-doc-ti { font-weight: 800; font-size: 1.1em; color: var(--ink); margin-bottom: 8px; }
+.oj-sti-art { font-weight: 700; font-size: 1.05em; color: var(--ink); margin-bottom: 6px; }
+.oj-ti-art { font-weight: 800; font-size: 1.15em; color: var(--ink); margin-bottom: 10px; }
+.oj-ti-section-1, .oj-ti-section-2 { font-weight: 800; font-size: 1.1em; color: var(--rubric); margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.03em; }
+.oj-tbl-txt { color: var(--ink); font-size: 13.5px; }
+.oj-quotation { border-left: 3px solid var(--rubric-soft); padding-left: 14px; margin: 12px 0; color: var(--ink-soft); font-style: italic; }
+.eli-subdivision { margin-bottom: 12px; }
+.eli-container, .eli-main-title, .eli-title { margin-bottom: 14px; }
 </style>
 </head>
 <body>
@@ -325,7 +366,9 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 <header class="topbar">
   <div class="topbar-inner">
     <div class="brand">
-      <div class="brand-mark">§</div>
+      <div class="brand-logo-wrap">
+        <img src="logo.png" alt="Inceptio Logo" class="brand-logo-img">
+      </div>
       <div>
         <div class="brand-title">AI Act Codex</div>
         <div class="brand-sub" data-i18n="brandsub"></div>
@@ -345,6 +388,9 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
       <button id="btnIT" class="active">IT</button>
       <button id="btnEN">EN</button>
     </div>
+    <button id="btnThemeToggle" class="theme-btn" title="Toggle Light/Dark Theme">
+      <span id="themeIcon">☀️</span>
+    </button>
   </div>
 </header>
 
@@ -408,7 +454,7 @@ const UI = {
     filterAll:'Tutti', filterProvider:'Fornitore', filterDeployer:'Deployer', filterImporter:'Importatore', filterDistributor:'Distributore', filterGpai:'GPAI', filterGov:'Governance', filterGeneral:'Generale',
     inforce:'In vigore dal', upcoming:'Si applica dal', phased:'Applicazione scaglionata',
     restart:'Ricomincia',
-    footer:'Questo strumento sintetizza il Regolamento (UE) 2024/1689 e il Regolamento (UE) 2026/1744 (Digital Omnibus sull\u2019IA) a scopo informativo e didattico per un contesto professionale. Non costituisce consulenza legale. Per il testo giuridicamente vincolante, consultare sempre EUR-Lex. Contenuto accurato al 29 luglio 2026; alcuni orientamenti attuativi e norme armonizzate sono ancora in corso di sviluppo.',
+    footer:'Questo strumento sintetizza il Regolamento (UE) 2024/1689 e il Regolamento (UE) 2026/1744 (Digital Omnibus sull\u2019IA) a scopo informativo e didattico per un contesto professionale. Non costituisce consulenza legale. Ultima verifica: 29 luglio 2026. Per il testo giuridicamente vincolante a tutti gli effetti di legge, consultare esclusivamente la versione in formato PDF firmata elettronicamente e pubblicata sulla Gazzetta Ufficiale dell\u2019Unione Europea su EUR-Lex.',
     noResults:'Nessun risultato per',
     results:'risultati'
   },
@@ -447,7 +493,7 @@ const UI = {
     filterAll:'All', filterProvider:'Provider', filterDeployer:'Deployer', filterImporter:'Importer', filterDistributor:'Distributor', filterGpai:'GPAI', filterGov:'Governance', filterGeneral:'General',
     inforce:'In force since', upcoming:'Applies from', phased:'Phased application',
     restart:'Start over',
-    footer:'This tool summarises Regulation (EU) 2024/1689 and Regulation (EU) 2026/1744 (Digital Omnibus on AI) for informational and educational purposes in a professional context. It is not legal advice. For the legally binding text, always consult EUR-Lex. Content accurate as of 29 July 2026; some implementing guidance and harmonised standards are still under development.',
+    footer:'This tool summarises Regulation (EU) 2024/1689 and Regulation (EU) 2026/1744 (Digital Omnibus on AI) for informational and educational purposes in a professional context. It is not legal advice. Last verified: 29 July 2026. The sole authentic and legally binding text remains exclusively the electronically signed PDF version published in the Official Journal of the European Union on EUR-Lex.',
     noResults:'No results for',
     results:'results'
   }
@@ -1373,6 +1419,20 @@ function renderRecitalsView(){
     <div class="lib-accordion">${items}</div>`;
 }
 
+const OMNIBUS_MODIFIED_ARTICLES = [1, 2, 3, 4, 5, 6, 10, 11, 17, 25, 27, 28, 29, 30, 40, 42, 43, 50, 56, 57, 58, 60, 63, 64, 69, 70, 72, 75, 76, 77, 95, 96, 97, 99, 111, 113];
+
+function openOmnibusArticle(artNum){
+  state.libSection = 'omnibus';
+  renderLibrary();
+  requestAnimationFrame(()=>{
+    const target = document.getElementById('omnibus-art-' + (artNum || 1));
+    if(target){
+      target.open = true;
+      target.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+  });
+}
+
 function renderArticleView(){
   const L = UI[state.lang];
   const arts = LIBRARY_DATA[state.lang].articles;
@@ -1381,12 +1441,27 @@ function renderArticleView(){
   const chapObj = CHAPTERS.find(c=>c.id===chap.id);
   const prevNum = art.num>1 ? art.num-1 : null;
   const nextNum = art.num<113 ? art.num+1 : null;
+  
+  const isOmnibusModified = OMNIBUS_MODIFIED_ARTICLES.includes(art.num);
+  const omnibusBanner = isOmnibusModified ? `
+    <div class="omnibus-alert-banner">
+      <span class="o-icon">⚠️</span>
+      <div class="o-text">
+        <strong>${state.lang==='it'?'Modificato dal Digital Omnibus (Regolamento (UE) 2026/1744)':'Amended by the Digital Omnibus (Regulation (EU) 2026/1744)'}</strong>
+        <p>${state.lang==='it'
+          ?'Questo articolo è soggetto a modifiche, integrazioni o differimenti introdotti dal Digital Omnibus sull’IA.'
+          :'This article is subject to amendments, additions or deferrals introduced by the Digital Omnibus on AI.'}</p>
+      </div>
+      <a href="#" class="o-link" onclick="event.preventDefault(); openOmnibusArticle(1);">${state.lang==='it'?'Vedi Modifica Omnibus →':'View Omnibus Amendment →'}</a>
+    </div>` : '';
+
   return `
     <div class="lib-breadcrumb">${chap.num} — ${state.lang==='it'?chapObj.it:chapObj.en}</div>
     <div class="lib-doc-head">
       <div class="lib-doc-num">${state.lang==='it'?'Articolo':'Article'} ${art.num}</div>
       <h2 class="lib-doc-title">${art.title}</h2>
     </div>
+    ${omnibusBanner}
     <div class="lib-doc-body">${art.html}</div>
     <div class="lib-nav-btns">
       <button ${prevNum?'':'disabled'} data-lib-article="${prevNum||''}">${L.libPrev}</button>
