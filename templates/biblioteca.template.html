@@ -266,12 +266,26 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .lib-doc-num{font-family:'IBM Plex Mono',monospace; color:var(--rubric); font-size:13px; margin-bottom:4px;}
 .lib-doc-title{font-family:'Fraunces',serif; font-size:26px; margin:0; line-height:1.2;}
 .lib-breadcrumb{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin-bottom:14px; text-transform:uppercase; letter-spacing:.05em;}
-.lib-doc-body{font-family:'Source Serif 4',Georgia,serif; font-size:15.5px; line-height:1.75; color:var(--ink);}
+.lib-doc-body{font-family:'Source Serif 4',Georgia,serif; font-size:15.5px; line-height:1.75; color:var(--ink); overflow-x:auto;}
 .lib-doc-body p.oj-normal{margin:0 0 12px;}
 .lib-doc-body table{border-collapse:collapse; width:100%; margin:0 0 2px;}
 .lib-doc-body table td{vertical-align:top; padding:0 0 10px;}
-.lib-doc-body table td:first-child{width:36px; padding-right:8px; color:var(--rubric); font-family:'IBM Plex Mono',monospace; font-size:13px;}
+/* EUR-Lex numbering-wrapper tables: a narrow "(a) | text" first cell. Does
+   NOT apply to genuine content tables (class="oj-table"), see below. */
+.lib-doc-body table:not(.oj-table) td:first-child{width:36px; padding-right:8px; color:var(--rubric); font-family:'IBM Plex Mono',monospace; font-size:13px;}
 .lib-doc-body table table{margin-left:22px;}
+/* Genuine multi-column data tables (e.g. the Digital Omnibus Art. 1 tables) —
+   render as normal tables, not numbering wrappers. */
+.lib-doc-body table.oj-table{width:100%; border-collapse:collapse; margin:0 0 16px;}
+.lib-doc-body table.oj-table td{border:1px solid var(--rule); padding:6px 10px; vertical-align:top; width:auto;}
+/* oj-table can itself be nested inside a numbering-wrapper table (e.g. the
+   Omnibus's "(43) | <inserted Annex text>" cell), so the :not(.oj-table)
+   rule above would otherwise still reach in via the outer wrapper. Restate
+   :first-child explicitly here (same specificity, later in source = wins). */
+.lib-doc-body table.oj-table td:first-child{width:auto; padding-right:10px; color:inherit; font-family:inherit; font-size:inherit;}
+.lib-doc-body table.oj-table td p{margin:0;}
+.lib-doc-body table.oj-table td p.oj-tbl-hdr{font-weight:600;}
+.lib-doc-body table.oj-table tr:has(p.oj-tbl-hdr) td{background:var(--paper-2);}
 .lib-doc-body p.oj-ti-grseq-1{font-weight:600; margin:20px 0 10px; font-family:'Fraunces',serif; font-size:17px;}
 .lib-doc-body p.oj-italic{font-style:italic;}
 .lib-nav-btns{display:flex; justify-content:space-between; margin-top:36px; padding-top:20px; border-top:1px solid var(--rule);}
@@ -955,7 +969,8 @@ function chapterForArticle(num){
 }
 
 /* ============================= STATE ============================= */
-let state = { lang:'it', mode:'guide', roleTab:'provider', filter:'all', query:'',
+let state = { lang:'it', mode:'guide', roleTab:'provider', filter:'all',
+              guideQuery:'', libQuery:'',
               libSection:'recitals', libArticle:1 };
 
 /* ============================= RENDER HELPERS ============================= */
@@ -1284,7 +1299,7 @@ function bindFilterChips(){
 }
 
 function applySearch(){
-  const q = state.query.trim().toLowerCase();
+  const q = state.guideQuery.trim().toLowerCase();
   const cards = document.querySelectorAll('.art-card');
   let visible = 0;
   cards.forEach(card=>{
@@ -1403,25 +1418,31 @@ function buildLibSearchIndex(){
     d.articles.forEach(a=>libSearchIndex[lang].push({type:'article', num:a.num, title:a.title, text:(a.title+' '+stripHtml(a.html)).toLowerCase()}));
     d.recitals.forEach(r=>libSearchIndex[lang].push({type:'recital', num:r.num, title:'', text:stripHtml(r.html).toLowerCase()}));
     d.annexes.forEach(a=>libSearchIndex[lang].push({type:'annex', num:a.num, title:a.title, text:(a.title+' '+stripHtml(a.html)).toLowerCase()}));
+    // The Digital Omnibus is English-only regardless of UI language, but it
+    // must still be findable no matter which language the user has selected.
+    OMNIBUS_DATA.en.articles.forEach(a=>libSearchIndex[lang].push({type:'omnibus-article', num:a.num, title:a.title, text:(a.title+' '+stripHtml(a.html)).toLowerCase()}));
+    OMNIBUS_DATA.en.recitals.forEach(r=>libSearchIndex[lang].push({type:'omnibus-recital', num:r.num, title:'', text:stripHtml(r.html).toLowerCase()}));
   });
 }
 function applyLibrarySearch(){
   const panel = document.getElementById('searchResultsPanel');
-  const q = state.query.trim().toLowerCase();
+  const q = state.libQuery.trim().toLowerCase();
   if(!q){ panel.classList.remove('show'); panel.innerHTML=''; document.getElementById('searchCount').textContent=''; return; }
   if(!libSearchIndex) buildLibSearchIndex();
   const matches = libSearchIndex[state.lang].filter(e=>e.text.includes(q)).slice(0,25);
   document.getElementById('searchCount').textContent = matches.length + ' ' + UI[state.lang].results;
   panel.innerHTML = matches.map(m=>{
-    const label = m.type==='article' ? `${state.lang==='it'?'Art.':'Art.'} ${m.num} — ${m.title}` :
+    const label = m.type==='article' ? `Art. ${m.num} — ${m.title}` :
                   m.type==='recital' ? `${state.lang==='it'?'Considerando':'Recital'} ${m.num}` :
-                  `${state.lang==='it'?'Allegato':'Annex'} ${m.num} — ${m.title}`;
+                  m.type==='annex' ? `${state.lang==='it'?'Allegato':'Annex'} ${m.num} — ${m.title}` :
+                  m.type==='omnibus-article' ? `Omnibus — Art. ${m.num} — ${m.title}` :
+                  `Omnibus — ${state.lang==='it'?'Considerando':'Recital'} ${m.num}`;
     return `<button class="search-result" data-type="${m.type}" data-num="${m.num}">${label}</button>`;
   }).join('');
   panel.classList.toggle('show', matches.length>0);
   panel.querySelectorAll('.search-result').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      openLibraryResult(btn.getAttribute('data-type'), btn.getAttribute('data-num'), state.query.trim());
+      openLibraryResult(btn.getAttribute('data-type'), btn.getAttribute('data-num'), state.libQuery.trim());
       panel.classList.remove('show');
     });
   });
@@ -1448,11 +1469,14 @@ function openLibraryResult(type, num, term){
   if(type==='article'){ state.libSection='articles'; state.libArticle=parseInt(num,10); }
   else if(type==='annex'){ state.libSection='annexes'; }
   else if(type==='recital'){ state.libSection='recitals'; }
+  else if(type==='omnibus-article' || type==='omnibus-recital'){ state.libSection='omnibus'; }
   renderLibrary();
   requestAnimationFrame(()=>{
     let target = null;
     if(type==='recital') target = document.getElementById('rec-'+num);
     if(type==='annex') target = document.getElementById('anx-'+num);
+    if(type==='omnibus-article') target = document.getElementById('omnibus-art-'+num);
+    if(type==='omnibus-recital') target = document.getElementById('omnibus-rec-'+num);
     if(target){ target.open = true; target.scrollIntoView({behavior:'smooth', block:'start'}); }
     if(term) highlightTerm(document.getElementById('libraryMain'), term);
   });
@@ -1474,15 +1498,24 @@ function renderAnnexesView(){
 function renderOmnibusView(){
   const L = UI[state.lang];
   const arts = OMNIBUS_DATA.en.articles;
-  const items = arts.map(a=>`
-    <details class="lib-accordion-item" id="omnibus-${a.num}">
+  const recitals = OMNIBUS_DATA.en.recitals;
+  const artItems = arts.map(a=>`
+    <details class="lib-accordion-item" id="omnibus-art-${a.num}">
       <summary>Article ${a.num} — ${a.title}</summary>
       <div class="lib-doc-body">${a.html}</div>
+    </details>`).join('');
+  const recItems = recitals.map(r=>`
+    <details class="lib-accordion-item" id="omnibus-rec-${r.num}">
+      <summary>Recital ${r.num}</summary>
+      <div class="lib-doc-body">${r.html}</div>
     </details>`).join('');
   return `
     <div class="block-head"><span class="block-num">§</span><h2>${L.libOmnibus}</h2></div>
     <div class="lib-note">${L.omnibusNote}</div>
-    <div class="lib-accordion">${items}</div>`;
+    <div class="block-desc">${state.lang==='it'?'Articoli':'Articles'}</div>
+    <div class="lib-accordion">${artItems}</div>
+    <div class="block-desc" style="margin-top:24px;">${state.lang==='it'?'Considerando':'Recitals'}</div>
+    <div class="lib-accordion">${recItems}</div>`;
 }
 
 function renderLibrary(){
@@ -1492,6 +1525,7 @@ function renderLibrary(){
   else if(state.libSection==='articles') root.innerHTML = renderArticleView();
   else if(state.libSection==='annexes') root.innerHTML = renderAnnexesView();
   else if(state.libSection==='omnibus') root.innerHTML = renderOmnibusView();
+  else { state.libSection='recitals'; root.innerHTML = renderRecitalsView(); }
   bindLibraryNav();
 }
 
@@ -1510,8 +1544,16 @@ function setMode(mode){
   document.getElementById('searchInput').placeholder = mode==='library' ? UI[state.lang].searchLibPh : UI[state.lang].searchph;
   document.getElementById('searchInput').value = '';
   document.getElementById('searchResultsPanel').classList.remove('show');
-  state.query = '';
+  document.getElementById('searchResultsPanel').innerHTML = '';
   document.getElementById('searchCount').textContent = '';
+  // Each mode owns its own search term — switching modes never lets one
+  // mode's stale query/filter state leak into the other.
+  if(mode==='guide'){
+    state.guideQuery = '';
+    applySearch();
+  } else {
+    state.libQuery = '';
+  }
   if(mode==='library' && typeof renderLibrary==='function') renderLibrary();
 }
 
@@ -1524,15 +1566,18 @@ function setLang(lang){
   document.getElementById('btnLibrary').textContent = UI[lang].modeLibrary;
   document.getElementById('searchInput').placeholder = state.mode==='library' ? UI[lang].searchLibPh : UI[lang].searchph;
   renderSidebar();
-  renderMain();
+  renderMain(); // uses state.guideQuery only — never affected by a library search
   renderFooter();
-  document.getElementById('searchInput').value = state.query;
-  if(state.mode==='library' && typeof renderLibrary==='function') renderLibrary();
+  document.getElementById('searchInput').value = state.mode==='library' ? state.libQuery : state.guideQuery;
+  if(state.mode==='library' && typeof renderLibrary==='function'){
+    renderLibrary();
+    applyLibrarySearch(); // rebuild results/highlighting against the new language's index
+  }
 }
 
 document.getElementById('searchInput').addEventListener('input', (e)=>{
-  state.query = e.target.value;
-  if(state.mode==='library') applyLibrarySearch(); else applySearch();
+  if(state.mode==='library'){ state.libQuery = e.target.value; applyLibrarySearch(); }
+  else { state.guideQuery = e.target.value; applySearch(); }
 });
 
 setLang('it');
