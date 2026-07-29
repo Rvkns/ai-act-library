@@ -394,8 +394,84 @@ mark { background: rgba(195, 92, 59, 0.25); color: inherit; padding: 0 2px; bord
 .lib-accordion-item summary { padding: 16px 20px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--ink-heading); list-style: none; display: flex; align-items: center; }
 .lib-accordion-item summary::-webkit-details-marker { display: none; }
 .lib-accordion-item summary::before { content: "+"; margin-right: 12px; color: var(--brand-orange); font-size: 16px; font-weight: 800; }
-.lib-accordion-item[open] summary::before { content: "3"; }
+.lib-accordion-item[open] summary::before { content: "−"; }
 .lib-accordion-item .lib-doc-body { padding: 0 20px 24px; }
+
+/* Sidebar Library Chapters & Article Badges */
+.lib-chapter {
+  margin-bottom: 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+.lib-chapter summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-heading);
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+.lib-chapter summary::-webkit-details-marker { display: none; }
+.lib-chapter summary:hover {
+  color: var(--brand-orange);
+  background: rgba(195, 92, 59, 0.08);
+}
+.lib-chapter summary .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-orange);
+  min-width: 24px;
+  flex: 0 0 auto;
+}
+
+.lib-chapter-arts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 4px 12px 14px;
+}
+
+.lib-art-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+html.dark .lib-art-link {
+  background: var(--bg-card-alt);
+  color: var(--ink);
+  border-color: var(--border-card);
+}
+.lib-art-link:hover {
+  color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  background: rgba(195, 92, 59, 0.1) !important;
+  transform: translateY(-1px);
+}
+.lib-art-link.active-lib {
+  background: var(--brand-orange) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-orange) !important;
+  box-shadow: 0 2px 8px rgba(195, 92, 59, 0.3);
+}
 
 .omnibus-alert-banner {
   background: rgba(195, 92, 59, 0.08); border: 1px solid rgba(195, 92, 59, 0.3); border-left: 4px solid var(--brand-orange);
@@ -1449,7 +1525,7 @@ function renderLibrarySidebar(){
     for(let n=r.from; n<=r.to; n++) nums.push(n);
     const links = nums.map(n=>`<a class="lib-art-link ${isOpenChapter && state.libArticle===n?'active-lib':''}" data-lib-article="${n}" href="#">${n}</a>`).join('');
     return `<details class="lib-chapter" ${isOpenChapter?'open':''}>
-      <summary><span class="n">${chap.num}</span>${state.lang==='it'?chap.it:chap.en}</summary>
+      <summary><span class="n">${chap.num}</span> ${state.lang==='it'?chap.it:chap.en}</summary>
       <div class="lib-chapter-arts">${links}</div>
     </details>`;
   }).join('');
