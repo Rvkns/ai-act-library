@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EU AI Act Codex — Regulation (EU) 2024/1689</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
 
 :root{
   --paper:#EDEAE0;
@@ -262,6 +262,38 @@ footer{border-top:1px solid var(--rule); padding:28px 24px 60px; max-width:var(-
 .search-result{display:block; width:100%; text-align:left; padding:8px 12px; border:none; border-bottom:1px solid var(--rule); background:transparent; cursor:pointer; font-size:12.5px; color:var(--ink); font-family:'Inter',sans-serif;}
 .search-result:last-child{border-bottom:none;}
 .search-result:hover{background:var(--paper-2);}
+.lib-doc-head{margin-bottom:20px;}
+.lib-doc-num{font-family:'IBM Plex Mono',monospace; color:var(--rubric); font-size:13px; margin-bottom:4px;}
+.lib-doc-title{font-family:'Fraunces',serif; font-size:26px; margin:0; line-height:1.2;}
+.lib-breadcrumb{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin-bottom:14px; text-transform:uppercase; letter-spacing:.05em;}
+.lib-doc-body{font-family:'Source Serif 4',Georgia,serif; font-size:15.5px; line-height:1.75; color:var(--ink);}
+.lib-doc-body p.oj-normal{margin:0 0 12px;}
+.lib-doc-body table{border-collapse:collapse; width:100%; margin:0 0 2px;}
+.lib-doc-body table td{vertical-align:top; padding:0 0 10px;}
+.lib-doc-body table td:first-child{width:36px; padding-right:8px; color:var(--rubric); font-family:'IBM Plex Mono',monospace; font-size:13px;}
+.lib-doc-body table table{margin-left:22px;}
+.lib-doc-body p.oj-ti-grseq-1{font-weight:600; margin:20px 0 10px; font-family:'Fraunces',serif; font-size:17px;}
+.lib-doc-body p.oj-italic{font-style:italic;}
+.lib-nav-btns{display:flex; justify-content:space-between; margin-top:36px; padding-top:20px; border-top:1px solid var(--rule);}
+.lib-nav-btns button{padding:10px 18px; border:1px solid var(--ink); background:transparent; border-radius:2px; cursor:pointer; font-size:13px; font-family:'Inter',sans-serif; color:var(--ink);}
+.lib-nav-btns button:hover:not(:disabled){background:var(--ink); color:var(--paper);}
+.lib-nav-btns button:disabled{opacity:.3; cursor:default;}
+.lib-accordion{display:flex; flex-direction:column; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:3px; overflow:hidden;}
+.lib-accordion-item{background:var(--card);}
+.lib-accordion-item summary{padding:13px 18px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft); list-style:none;}
+.lib-accordion-item summary::-webkit-details-marker{display:none;}
+.lib-accordion-item summary::before{content:'+'; margin-right:8px; color:var(--rubric); font-weight:600;}
+.lib-accordion-item[open] summary::before{content:'\2013';}
+.lib-accordion-item .lib-doc-body{padding:0 18px 20px;}
+.lib-chapter{margin-bottom:2px;}
+.lib-chapter summary{cursor:pointer; padding:5px 7px; font-size:13px; color:var(--ink-soft); list-style:none; display:flex; gap:8px; align-items:baseline;}
+.lib-chapter summary::-webkit-details-marker{display:none;}
+.lib-chapter summary .n{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--rubric); width:20px; flex:0 0 auto;}
+.lib-chapter-arts{display:flex; flex-wrap:wrap; gap:4px; padding:6px 0 10px 28px;}
+.lib-art-link{padding:3px 7px; border-radius:2px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-decoration:none; border:1px solid transparent;}
+.lib-art-link:hover{background:var(--paper-2);}
+.active-lib{background:var(--ink) !important; color:var(--paper) !important;}
+.lib-note{background:var(--card); border:1px dashed var(--indigo); border-radius:3px; padding:14px 16px; font-size:13px; color:var(--ink-soft); margin-bottom:20px;}
 </style>
 </head>
 <body>
@@ -328,6 +360,9 @@ const UI = {
     heroMeta2: 'Solo a scopo informativo — non costituisce consulenza legale.',
     navDash:'Dashboard', navClass:'Strumento di classificazione', navRoles:'Obblighi per ruolo', navChapters:'Capitoli', navAnnex:'Allegati', navScen:'Casi pratici',
     modeGuide:'Guida', modeLibrary:'Biblioteca', searchLibPh:'Cerca nel testo integrale…',
+    libRecitals:'Considerando', libRecital:'Considerando', libArticles:'Capi e Articoli', libAnnexes:'Allegati', libOmnibus:'Digital Omnibus 2026/1744',
+    libRecitalsDesc:'I considerando espongono le motivazioni del legislatore. Non sono vincolanti, ma aiutano a interpretare gli articoli.',
+    libPrev:'← Precedente', libNext:'Successivo →',
     s1:'01', s1t:'Livelli di rischio', s1d:'L\u2019AI Act adotta un approccio basato sul rischio: quattro livelli, più il regime parallelo per i modelli GPAI.',
     tierU:'Rischio inaccettabile — Vietato', tierUd:'Vietato in modo assoluto dall\u2019articolo 5. Non esiste un percorso di conformità: va evitato o eliminato.',
     tierH:'Alto rischio', tierHd:'Obblighi estesi per fornitori e deployer (artt. 6\u201349): gestione del rischio, governance dei dati, documentazione, sorveglianza umana, valutazione di conformità.',
@@ -362,6 +397,9 @@ const UI = {
     heroMeta2: 'For informational purposes only — not legal advice.',
     navDash:'Dashboard', navClass:'Classification tool', navRoles:'Obligations by role', navChapters:'Chapters', navAnnex:'Annexes', navScen:'Common scenarios',
     modeGuide:'Guide', modeLibrary:'Library', searchLibPh:'Search the full text…',
+    libRecitals:'Recitals', libRecital:'Recital', libArticles:'Chapters and Articles', libAnnexes:'Annexes', libOmnibus:'Digital Omnibus 2026/1744',
+    libRecitalsDesc:'Recitals set out the legislator’s reasoning. They are not binding, but help interpret the articles.',
+    libPrev:'← Previous', libNext:'Next →',
     s1:'01', s1t:'Risk tiers', s1d:'The AI Act takes a risk-based approach: four tiers, plus a parallel regime for GPAI models.',
     tierU:'Unacceptable risk — Prohibited', tierUd:'Banned outright under Article 5. No compliance route exists — it must be avoided or removed.',
     tierH:'High risk', tierHd:'Extensive obligations for providers and deployers (Arts 6\u201349): risk management, data governance, documentation, human oversight, conformity assessment.',
@@ -1220,6 +1258,96 @@ function applySearch(){
   } else {
     countEl.textContent = '';
   }
+}
+
+/* ============================= LIBRARY ============================= */
+function renderLibrarySidebar(){
+  const L = UI[state.lang];
+  const chapterGroups = CHAPTER_RANGES.map(r=>{
+    const chap = CHAPTERS.find(c=>c.id===r.id);
+    const isOpenChapter = state.libSection==='articles' && state.libArticle>=r.from && state.libArticle<=r.to;
+    const nums = [];
+    for(let n=r.from; n<=r.to; n++) nums.push(n);
+    const links = nums.map(n=>`<a class="lib-art-link ${isOpenChapter && state.libArticle===n?'active-lib':''}" data-lib-article="${n}" href="#">${n}</a>`).join('');
+    return `<details class="lib-chapter" ${isOpenChapter?'open':''}>
+      <summary><span class="n">${chap.num}</span>${state.lang==='it'?chap.it:chap.en}</summary>
+      <div class="lib-chapter-arts">${links}</div>
+    </details>`;
+  }).join('');
+  document.getElementById('librarySidebar').innerHTML = `
+    <div class="side-group">
+      <a class="side-link ${state.libSection==='recitals'?'active-lib':''}" data-lib-section="recitals" href="#">${L.libRecitals}</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">${L.libArticles}</div>
+      ${chapterGroups}
+    </div>
+    <div class="side-group">
+      <a class="side-link ${state.libSection==='annexes'?'active-lib':''}" data-lib-section="annexes" href="#">${L.libAnnexes}</a>
+      <a class="side-link ${state.libSection==='omnibus'?'active-lib':''}" data-lib-section="omnibus" href="#">${L.libOmnibus}</a>
+    </div>`;
+  document.querySelectorAll('#librarySidebar [data-lib-section]').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.preventDefault(); state.libSection = el.getAttribute('data-lib-section'); renderLibrary(); });
+  });
+  document.querySelectorAll('#librarySidebar [data-lib-article]').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.preventDefault(); state.libSection='articles'; state.libArticle = parseInt(el.getAttribute('data-lib-article'),10); renderLibrary(); });
+  });
+}
+
+function renderRecitalsView(){
+  const L = UI[state.lang];
+  const recitals = LIBRARY_DATA[state.lang].recitals;
+  const items = recitals.map(r=>`
+    <details class="lib-accordion-item" id="rec-${r.num}">
+      <summary>${L.libRecital} ${r.num}</summary>
+      <div class="lib-doc-body">${r.html}</div>
+    </details>`).join('');
+  return `
+    <div class="block-head"><span class="block-num">§</span><h2>${L.libRecitals}</h2></div>
+    <p class="block-desc">${L.libRecitalsDesc}</p>
+    <div class="lib-accordion">${items}</div>`;
+}
+
+function renderArticleView(){
+  const L = UI[state.lang];
+  const arts = LIBRARY_DATA[state.lang].articles;
+  const art = arts.find(a=>a.num===state.libArticle) || arts[0];
+  const chap = chapterForArticle(art.num);
+  const chapObj = CHAPTERS.find(c=>c.id===chap.id);
+  const prevNum = art.num>1 ? art.num-1 : null;
+  const nextNum = art.num<113 ? art.num+1 : null;
+  return `
+    <div class="lib-breadcrumb">${chap.num} — ${state.lang==='it'?chapObj.it:chapObj.en}</div>
+    <div class="lib-doc-head">
+      <div class="lib-doc-num">${state.lang==='it'?'Articolo':'Article'} ${art.num}</div>
+      <h2 class="lib-doc-title">${art.title}</h2>
+    </div>
+    <div class="lib-doc-body">${art.html}</div>
+    <div class="lib-nav-btns">
+      <button ${prevNum?'':'disabled'} data-lib-article="${prevNum||''}">${L.libPrev}</button>
+      <button ${nextNum?'':'disabled'} data-lib-article="${nextNum||''}">${L.libNext}</button>
+    </div>`;
+}
+
+function bindLibraryNav(){
+  document.querySelectorAll('#libraryMain [data-lib-article]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const n = btn.getAttribute('data-lib-article');
+      if(!n) return;
+      state.libArticle = parseInt(n,10);
+      renderLibrary();
+      document.getElementById('libraryMain').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
+function renderLibrary(){
+  renderLibrarySidebar();
+  const root = document.getElementById('libraryMain');
+  if(state.libSection==='recitals') root.innerHTML = renderRecitalsView();
+  else if(state.libSection==='articles') root.innerHTML = renderArticleView();
+  else root.innerHTML = ''; // annexes/omnibus added in Task 4
+  bindLibraryNav();
 }
 
 /* ============================= INIT & EVENTS ============================= */
